@@ -9,7 +9,7 @@ export class User {
   @Column({ unique: true, nullable: false, length: 100 })
   email: string;
 
-  @Column({ nullable: false, length: 50 })
+  @Column({ nullable: false, length: 255 })
   password: string;
 
   @OneToMany(() => Post, (post) => post.user)

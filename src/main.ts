@@ -1,17 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
+  const app = await NestFactory.create(AppModule);
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -22,13 +16,46 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('Nest App')
+    .setDescription('The API description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('No')
+    .addBearerAuth
+    // {
+    //   type: 'http',
+    //   scheme: 'bearer',
+    //   bearerFormat: 'JWT',
+    //   name: 'Authorization',
+    //   description: 'Enter JWT token',
+    //   in: 'header',
+    // },
+    // 'access-token',
+    ()
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () => {
+    const document = SwaggerModule.createDocument(app, config);
+    // document.components = {
+    //   securitySchemes: {
+    //     bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+    //   },
+    // };
+    // document.paths = Object.keys(document.paths).reduce((acc, path) => {
+    //   acc[path] = Object.keys(document.paths[path]).reduce(
+    //     (accMethods, method) => {
+    //       accMethods[method] = {
+    //         ...document.paths[path][method],
+    //         security: [{ bearerAuth: [] }],
+    //       };
+    //       return accMethods;
+    //     },
+    //     {},
+    //   );
+    //   return acc;
+    // }, {});
+
+    return document;
+  };
   SwaggerModule.setup('api', app, documentFactory);
 
   await app.listen(3001, '0.0.0.0');

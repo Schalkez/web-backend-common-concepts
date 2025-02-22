@@ -1,16 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './user.entity';
-import { CreateUserDto } from './dtos/CreateUserDto';
-import { UserResponseDto } from './dtos/UserResponseDto';
+import { User } from '../user.entity';
+import { UserResponseDto } from '../dtos/UserResponseDto';
 import { plainToClass } from 'class-transformer';
 import { Repository } from 'typeorm';
+import { CreateUserProvider } from './create-user.provider';
+import { CreateUserDto } from '../dtos/CreateUserDto';
+import { FindOneUserByEmailProvider } from './find-one-user-by-email.provider';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly findOneUserByEmailProvider: FindOneUserByEmailProvider,
+    private readonly createUserProvider: CreateUserProvider,
   ) {}
+
+  async createUser(body: CreateUserDto) {
+    const user = await this.createUserProvider.createUser(body);
+    return user;
+  }
+
   async getAllUsers(limit?: number, page?: number) {
     console.log(limit, page);
 
@@ -30,13 +40,14 @@ export class UserService {
     return plainToClass(UserResponseDto, user);
   }
 
-  async createUser(body: CreateUserDto): Promise<UserResponseDto> {
-    const user = this.userRepository.create(body);
-    const savedUser = await this.userRepository.save(user);
-    return plainToClass(UserResponseDto, savedUser);
+  async findUserById(id: number) {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  async findUser(id: number) {
-    return this.userRepository.findOne({ where: { id } });
+  async findUserByEmail(email: string) {
+    const user =
+      await this.findOneUserByEmailProvider.findOneUserByEmail(email);
+
+    return user;
   }
 }

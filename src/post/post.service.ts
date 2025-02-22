@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { CreatePostDto } from './dtos/CreatePostDto';
-import { UserService } from '@/user/user.service';
+import { UserService } from '@/user/providers/user.service';
 import { GetPostsDto } from './dtos/get-post.dto';
 import { PaginationProvider } from '@/common/pagination/providers/pagination.provider';
 import { Paginated } from '@/common/pagination/interfaces/paginated.interface';
@@ -22,7 +22,7 @@ export class PostService {
 
   async createPost(body: CreatePostDto): Promise<Post> {
     try {
-      const user = await this.userService.findUser(body.userId);
+      const user = await this.userService.findUserById(body.userId);
       const post = this.postRepository.create({ ...body, user });
       return this.postRepository.save(post);
     } catch (error) {
